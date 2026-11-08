@@ -269,61 +269,60 @@
         تمامی حقوق محفوظ است &copy; تیم قدرتمند EP
     </footer>
 
-    <!-- Script to Fetch and Render Players from Google Sheets -->
+    <!-- Script to Fetch and Render Players from Google Sheet (CSV) with players.json fallback -->
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbwbnb7BWClxyreKi1CeNDhUesG0SchOJ7MCMCgItolylDRcKtvbM97-5PRjKFx-VRx2Dw/exec";
-
         let allPlayers = [];
 
-        async function fetchPlayers() {
-            try {
-                const response = await fetch(API_URL);
-                const data = await response.json();
-                allPlayers = data;
-                document.getElementById('loading').style.display = 'none';
-                renderPlayers(allPlayers);
-            } catch (error) {
-                console.error("Error fetching data:", error);
-                document.getElementById('loading').innerHTML = '<p class="text-red-400">خطا در بارگذاری اطلاعات از پایگاه داده.</p>';
-            }
+        // جلوگیری از مشکل نمایش کاراکترهای خاص
+        function esc(v) {
+            return String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
         }
 
-        function renderPlayers(players) {
-            const grid = document.getElementById('playersGrid');
-            const noResult = document.getElementById('noResult');
-            grid.innerHTML = '';
-
-            if (players.length === 0) {
-                noResult.classList.remove('hidden');
-                grid.classList.add('hidden');
-                return;
+        // خواندن مقدار با چند نام ممکن برای ستون (انگلیسی یا فارسی)
+        function pick(obj, keys) {
+            const map = {};
+            Object.keys(obj).forEach(k => map[k.toString().trim().toLowerCase()] = obj[k]);
+            for (const k of keys) {
+                const v = map[k.toLowerCase()];
+                if (v !== undefined && v !== null && String(v).trim() !== '') return v;
             }
+            return '';
+        }
 
-            noResult.classList.add('hidden');
-            grid.classList.remove('hidden');
+        // تبدیل پاسخ‌های مختلف به آرایه‌ای از آبجکت‌ها
+        function normalizeData(data) {
+            if (data && !Array.isArray(data)) {
+                data = data.data || data.players || data.result || data.rows || [];
+            }
+            if (!Array.isArray(data)) return [];
+            // اگر آرایه‌ی دوبعدی بود (ردیف اول = سرستون)
+            if (data.length && Array.isArray(data[0])) {
+                const headers = data[0];
+                data = data.slice(1).map(r => Object.fromEntries(headers.map((h, i) => [h, r[i]])));
+            }
+            return data;
+        }
 
-            players.forEach(p => {
-                const realName = p.realName || 'نامشخص';
-                const gameName = p.gameName || 'ثبت نشده';
-                const bale = p.bale || 'ثبت نشده';
-                const rank = p.rank || '-';
-                const role = p.role || 'عضو عادی';
-                const code = p.code || '-';
-                const activity = p.activity || 'نامشخص';
+        // لینک CSV منتشرشده‌ی Google Sheet
+        const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRScXvr-EwDmrIOzbpVb3zFrk3u-Hv9M4M8G1dm00Goi9Vpmv3_9Exlksif5NALQPfBhK9-T2YBu5Fh/pub?gid=0&single=true&output=csv";
 
-                // Role Badge Color
-                let roleClass = 'bg-red-500/10 text-red-300 border-red-500/20';
-                if (role.includes('لیدر') || role.includes('سپهبد') || role.includes('ارتشبد') || role.includes('کولیدر')) {
-                    roleClass = 'bg-amber-500/15 text-amber-300 border-amber-500/30';
-                }
-
-                const card = document.createElement('div');
-                card.className = 'glass-card rounded-2xl p-6 shadow-xl transition duration-300 flex flex-col justify-between';
-                
-                card.innerHTML = `
-                    <div>
-                        <div class="flex justify-between items-start mb-4">
-                            <div>
-                                <h3 class="text-xl font-bold text-white">${realName}</h3>
-                                <p class="text-xs text-red-400 mt-0.5">آیدی بازی: ${gameName}</p>
-                   
+        // تبدیل متن CSV به آرایه‌ی آبجکت (با پشتیبانی از گیومه و ویرگول داخل سلول)
+        function parseCSV(text) {
+            text = text.replace(/^\uFEFF/, '');
+            const rows = [];
+            let row = [], cell = '', inQ = false;
+            for (let i = 0; i < text.length; i++) {
+                const ch = text[i];
+                if (inQ) {
+                    if (ch === '"' && text[i + 1] === '"') { cell += '"'; i++; }
+                    else if (ch === '"') inQ = false;
+                    else cell += ch;
+                } else if (ch === '"') inQ = true;
+                else if (ch === ',') { row.push(cell); cell = ''; }
+                else if (ch === '\n' || ch === '\r') {
+                    if (ch === '\r' && text[i + 1] === '\n') i++;
+                    row.push(cell); cell = '';
+                    rows.push(row); row = [];
+                } else cell += ch;
+            }
+            if (cell !== '' || row.length) { row.push(cell); rows.push(row); 
