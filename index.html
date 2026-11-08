@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تیم EP - سامانه رسمی و تورنمنت‌ها</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        darkBg: '#090505',
+                        cardBg: 'rgba(24, 10, 10, 0.75)',
+                        accentRed: '#dc2626',
+                        deepRed: '#991b1b',
+                        brightRed: '#ef4444'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Vazirmatn Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background: linear-gradient(135deg, #0f0505 0%, #1a0508 50%, #090505 100%);
+            min-height: 100vh;
+        }
+        .glass-card {
+            background: rgba(24, 10, 10, 0.65);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+        .glass-card:hover {
+            border-color: rgba(239, 68, 68, 0.5);
+            box-shadow: 0 10px 30px -10px rgba(220, 38, 38, 0.3);
+        }
+        .glow-text {
+            text-shadow: 0 0 20px rgba(239, 68, 68, 0.6);
+        }
+    </style>
+</head>
+<body class="text-gray-100 flex flex-col min-h-screen">
+
+    <!-- Header -->
+    <header class="py-10 text-center relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-r from-red-600/10 via-rose-600/10 to-amber-600/10 blur-3xl -z-10"></div>
+        <div class="inline-block p-3 rounded-2xl bg-red-600/10 border border-red-500/20 mb-3 shadow-lg shadow-red-900/20">
+            <i class="fa-solid fa-shield-halved text-4xl text-red-500"></i>
+        </div>
+        <h1 class="text-4xl md:text-6xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-rose-400 to-amber-500 mb-2 glow-text">
+            تیم قدرتمند EP
+        </h1>
+        <p class="text-gray-400 text-sm md:text-base">مرکز فرماندهی، پایگاه داده بازیکنان و تورنمنت‌های اختصاصی</p>
+        
+        <!-- Quick Navigation -->
+        <div class="flex justify-center gap-3 mt-6 flex-wrap px-4">
+            <a href="#players" class="px-5 py-2 rounded-xl bg-red-600/20 border border-red-500/30 hover:bg-red-600/30 text-sm font-medium transition">
+                <i class="fa-solid fa-users ml-2"></i>لیست بازیکنان
+            </a>
+            <a href="#tournaments" class="px-5 py-2 rounded-xl bg-red-600/20 border border-red-500/30 hover:bg-red-600/30 text-sm font-medium transition">
+                <i class="fa-solid fa-trophy ml-2"></i>تورنمنت‌ها (۸ تا ۶۰ نفره)
+            </a>
+            <a href="#halloffame" class="px-5 py-2 rounded-xl bg-red-600/20 border border-red-500/30 hover:bg-red-600/30 text-sm font-medium transition">
+                <i class="fa-solid fa-medal ml-2"></i>نفرات برتر
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="container mx-auto px-4 pb-16 flex-grow max-w-6xl space-y-16">
+        
+        <!-- SECTION 1: PLAYERS DATABASE -->
+        <section id="players">
+            <div class="text-center mb-8">
+                <h2 class="text-2xl md:text-3xl font-bold text-white mb-2">پایگاه داده و جستجوی اعضا</h2>
+                <p class="text-gray-400 text-sm">اطلاعات به‌روز اعضا از پایگاه داده اختصاصی EP</p>
+            </div>
+
+            <!-- Search Section (Centered) -->
+            <div class="flex justify-center mb-10">
+                <div class="relative w-full max-w-md">
+                    <span class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-red-400">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </span>
+                    <input type="text" id="searchInput" onkeyup="filterPlayers()" placeholder="جستجو بر اساس نام، بازی، بله یا کد..." 
+                        class="w-full pr-11 pl-4 py-3.5 rounded-2xl glass-card text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 transition shadow-xl">
+                </div>
+            </div>
+
+            <!-- Loading / Status -->
+            <div id="loading" class="text-center py-12 text-red-400">
+                <i class="fa-solid fa-spinner fa-spin text-3xl mb-2"></i>
+                <p>در حال دریافت اطلاعات اعضا از پایگاه داده...</p>
+            </div>
+
+            <!-- Players Grid -->
+            <div id="playersGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 hidden">
+                <!-- Dynamic Cards -->
+            </div>
+
+            <!-- Empty State -->
+            <div id="noResult" class="text-center py-12 text-gray-400 hidden">
+                <i class="fa-solid fa-triangle-exclamation text-4xl mb-2 text-amber-500"></i>
+                <p>هیچ بازیکنی با این مشخصات پیدا نشد.</p>
+            </div>
+        </section>
+
+
+        <!-- SECTION 2: TOURNAMENTS (8 to 60 Players) -->
+        <section id="tournaments" class="pt-8">
+            <div class="text-center mb-10">
+                <span class="text-red-500 text-xs font-bold tracking-widest uppercase bg-red-500/10 px-3 py-1 rounded-full border border-red-500/20">مسابقات و لیگ‌ها</span>
+                <h2 class="text-3xl font-black text-white mt-3 mb-2">تورنمنت‌های تیم EP (از ۸ تا ۶۰ نفره)</h2>
+                <p class="text-gray-400 text-sm">دسته‌بندی تورنمنت‌ها بر اساس ظرفیت و سطح رقابت‌ها</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- 8 Player Tournament -->
+                <div class="glass-card rounded-2xl p-6 flex flex-col justify-between transition duration-300">
+                    <div>
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="px-3 py-1 rounded-lg bg-red-600/20 text-red-400 text-xs font-bold border border-red-500/30">سرعتی</span>
+                            <span class="text-xl font-black text-white">۸ نفره</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-white mb-2">تورنمنت حذفی کوچک</h3>
+                        <p class="text-xs text-gray-400 mb-6">مناسب برای مسابقات درون‌تیمی سریع، دوئل‌های فشرده و تعیین سطح فوری.</p>
+                        <ul class="space-y-2 text-xs text-gray-300 mb-6 border-t border-gray-800 pt-4">
+                            <li class="flex justify-between"><span class="text-gray-400">تعداد مرحله:</span><span class="font-semibold text-white">۳ مرحله (یک‌چهارم تا فینال)</span></li>
+                            <li class="flex justify-between"><span class="text-gray-400">جایزه نفر اول:</span><span class="text-amber-400 font-bold">مدال طلا + امتیاز ویژه</span></li>
+                        </ul>
+                    </div>
+                    <button onclick="alert('ثبت‌نام این تورنمنت به زودی آغاز خواهد شد!')" class="w-full py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs transition shadow-lg shadow-red-900/40">
+                        اطلاعات و ثبت‌نام
+                    </button>
+                </div>
+
+                <!-- 16 Player Tournament -->
+                <div class="glass-card rounded-2xl p-6 flex flex-col justify-between transition duration-300">
+                    <div>
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="px-3 py-1 rounded-lg bg-rose-600/20 text-rose-400 text-xs font-bold border border-rose-500/30">متوسط</span>
+                            <span class="text-xl font-black text-white">۱۶ نفره</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-white mb-2">جام حذفی EP</h3>
+                        <p class="text-xs text-gray-400 mb-6">رقابت فشرده بین بازیکنان منتخب با جدول حذفی استاندارد و هیجان بالا.</p>
+                        <ul class="space-y-2 text-xs text-gray-300 mb-6 border-t border-gray-800 pt-4">
+                            <li class="flex justify-between"><span class="text-gray-400">تعداد مرحله:</span><span class="font-semibold text-white">۴ مرحله حذفی</span></li>
+                            <li class="flex justify-between"><span class="text-gray-400">جایزه نفر اول:</span><span class="text-amber-400 font-bold">عنوان قهرمان جام + مدال</span></li>
+                        </ul>
+                    </div>
+                    <button onclick="alert('ثبت‌نام این تورنمنت به زودی آغاز خواهد شد!')" class="w-full py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs transition shadow-lg shadow-red-900/40">
+                        اطلاعات و ثبت‌نام
+                    </button>
+                </div>
+
+                <!-- 32 Player Tournament -->
+                <div class="glass-card rounded-2xl p-6 flex flex-col justify-between transition duration-300 border-red-500/40">
+                    <div>
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="px-3 py-1 rounded-lg bg-amber-600/20 text-amber-400 text-xs font-bold border border-amber-500/30">پیشرفته</span>
+                            <span class="text-xl font-black text-white">۳۲ نفره</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-white mb-2">لیگ بزرگ قهرمانان</h3>
+                        <p class="text-xs text-gray-400 mb-6">مرحله گروهی + حذفی. مناسب برای محک جدی مهارت‌ها و رقابت تمام عیار.</p>
+                        <ul class="space-y-2 text-xs text-gray-300 mb-6 border-t border-gray-800 pt-4">
+                            <li class="flex justify-between"><span class="text-gray-400">ساختار:</span><span class="font-semibold text-white">گروهی + حذفی</span></li>
+                            <li class="flex justify-between"><span class="text-gray-400">جایزه نفر اول:</span><span class="text-amber-400 font-bold">کاپ طلا + کاپیتانی موقت</span></li>
+                        </ul>
+                    </div>
+                    <button onclick="alert('ثبت‌نام این تورنمنت به زودی آغاز خواهد شد!')" class="w-full py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs transition shadow-lg shadow-red-900/40">
+                        اطلاعات و ثبت‌نام
+                    </button>
+                </div>
+
+                <!-- 60 Player Tournament -->
+                <div class="glass-card rounded-2xl p-6 flex flex-col justify-between transition duration-300 ring-2 ring-red-500/50">
+                    <div>
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="px-3 py-1 rounded-lg bg-purple-600/20 text-purple-300 text-xs font-bold border border-purple-500/30">فوق‌العاده</span>
+                            <span class="text-xl font-black text-white">۶۰ نفره</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-white mb-2">مسترکاپ سراسری EP</h3>
+                        <p class="text-xs text-gray-400 mb-6">بزرگترین رویداد رسمی تیم با حضور تمامی اعضا و برترین‌های کلن‌های همکار.</p>
+                        <ul class="space-y-2 text-xs text-gray-300 mb-6 border-t border-gray-800 pt-4">
+                            <li class="flex justify-between"><span class="text-gray-400">ساختار:</span><span class="font-semibold text-white">لیگ سراسری + حذفی نهایی</span></li>
+                            <li class="flex justify-between"><span class="text-gray-400">جایزه نفر اول:</span><span class="text-amber-400 font-bold">نشان اسطوره EP + پاداش ویژه</span></li>
+                        </ul>
+                    </div>
+                    <button onclick="alert('ثبت‌نام این تورنمنت به زودی آغاز خواهد شد!')" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white font-bold text-xs transition shadow-lg shadow-red-900/50">
+                        ثبت‌نام مسترکاپ ۶۰ نفره
+                    </button>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- SECTION 3: TOP PLAYERS / HALL OF FAME -->
+        <section id="halloffame" class="pt-8">
+            <div class="text-center mb-10">
+                <span class="text-amber-400 text-xs font-bold tracking-widest uppercase bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20">تالار افتخارات</span>
+                <h2 class="text-3xl font-black text-white mt-3 mb-2">نفرات برتر و اسطوره‌های EP</h2>
+                <p class="text-gray-400 text-sm">برترین عملکردها و مقام‌آوران مسابقات اخیر تیم</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- 2nd Place -->
+                <div class="glass-card rounded-2xl p-6 text-center relative border-gray-700/50 flex flex-col justify-between mt-0 md:mt-6">
+                    <div class="absolute -top-4 right-1/2 translate-x-1/2 w-10 h-10 rounded-full bg-slate-300 text-slate-900 font-black flex items-center justify-center shadow-lg border-2 border-slate-100">
+                        ۲
+                    </div>
+                    <div class="pt-4">
+                        <i class="fa-solid fa-medal text-slate-300 text-3xl mb-3"></i>
+                        <h3 class="text-xl font-bold text-white">میلاد</h3>
+                        <p class="text-xs text-red-400 mb-4">نائب قهرمان لیگ گذشته</p>
+                        <div class="bg-black/30 rounded-xl p-3 text-xs text-gray-300 space-y-1">
+                            <div class="flex justify-between"><span>امتیاز کل:</span><span class="font-bold text-white">۲۴۵۰</span></div>
+                            <div class="flex justify-between"><span>وین استریک:</span><span class="text-emerald-400 font-bold">۱۴ برد پی در پی</span></div>
+                        </div>
+                    </div>
+                    <span class="text-[10px] text-gray-500 mt-4 block">نشان نقره EP</span>
+                </div>
+
+                <!-- 1st Place (Champion) -->
+                <div class="glass-card rounded-2xl p-6 text-center relative border-amber-500/50 bg-gradient-to-b from-red-950/40 to-amber-950/20 flex flex-col justify-between shadow-2xl shadow-red-950/50 scale-105 z-10">
+                    <div class="absolute -top-5 right-1/2 translate-x-1/2 w-12 h-12 rounded-full bg-amber-400 text-slate-950 font-black text-lg flex items-center justify-center shadow-xl border-2 border-amber-200">
+                        <i class="fa-solid fa-crown"></i>
+                    </div>
+                    <div class="pt-4">
+                        <i class="fa-solid fa-trophy text-amber-400 text-4xl mb-3 animate-pulse"></i>
+                        <h3 class="text-2xl font-black text-amber-300">آیهان</h3>
+                        <p class="text-xs text-amber-400/90 font-bold mb-4">لیدر و اسطوره برتر تیم EP</p>
+                        <div class="bg-black/40 rounded-xl p-3 text-xs text-gray-200 space-y-1.5 border border-amber-500/20">
+                            <div class="flex justify-between"><span>امتیاز کل:</span><span class="font-bold text-amber-300">۲۹۸۰</span></div>
+                            <div class="flex justify-between"><span>قهرمانی‌ها:</span><span class="text-amber-400 font-bold">۵ کاپ طلا</span></div>
+                        </div>
+                    </div>
+                    <span class="text-[11px] text-amber-400/80 font-bold mt-4 block">نشان طلایی اسطوره EP</span>
+                </div>
+
+                <!-- 3rd Place -->
+                <div class="glass-card rounded-2xl p-6 text-center relative border-amber-800/40 flex flex-col justify-between mt-0 md:mt-6">
+                    <div class="absolute -top-4 right-1/2 translate-x-1/2 w-10 h-10 rounded-full bg-amber-700 text-amber-100 font-black flex items-center justify-center shadow-lg border-2 border-amber-600">
+                        ۳
+                    </div>
+                    <div class="pt-4">
+                        <i class="fa-solid fa-award text-amber-700 text-3xl mb-3"></i>
+                        <h3 class="text-xl font-bold text-white">محمد حسین</h3>
+                        <p class="text-xs text-red-400 mb-4">کولیدر و برترین استراتژیست</p>
+                        <div class="bg-black/30 rounded-xl p-3 text-xs text-gray-300 space-y-1">
+                            <div class="flex justify-between"><span>امتیاز کل:</span><span class="font-bold text-white">۲۲۰۰</span></div>
+                            <div class="flex justify-between"><span>وین استریک:</span><span class="text-emerald-400 font-bold">۱۱ برد پی در پی</span></div>
+                        </div>
+                    </div>
+                    <span class="text-[10px] text-gray-500 mt-4 block">نشان برنز EP</span>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-6 text-center text-xs text-gray-500 border-t border-red-950/50 bg-black/40">
+        تمامی حقوق محفوظ است &copy; تیم قدرتمند EP
+    </footer>
+
+    <!-- Script to Fetch and Render Players from Google Sheets -->
+    <script>
+        const API_URL = "https://script.google.com/macros/s/AKfycbwbnb7BWClxyreKi1CeNDhUesG0SchOJ7MCMCgItolylDRcKtvbM97-5PRjKFx-VRx2Dw/exec";
+
+        let allPlayers = [];
+
+        async function fetchPlayers() {
+            try {
+                const response = await fetch(API_URL);
+                const data = await response.json();
+                allPlayers = data;
+                document.getElementById('loading').style.display = 'none';
+                renderPlayers(allPlayers);
+            } catch (error) {
+                console.error("Error fetching data:", error);
+                document.getElementById('loading').innerHTML = '<p class="text-red-400">خطا در بارگذاری اطلاعات از پایگاه داده.</p>';
+            }
+        }
+
+        function renderPlayers(players) {
+            const grid = document.getElementById('playersGrid');
+            const noResult = document.getElementById('noResult');
+            grid.innerHTML = '';
+
+            if (players.length === 0) {
+                noResult.classList.remove('hidden');
+                grid.classList.add('hidden');
+                return;
+            }
+
+            noResult.classList.add('hidden');
+            grid.classList.remove('hidden');
+
+            players.forEach(p => {
+                const realName = p.realName || 'نامشخص';
+                const gameName = p.gameName || 'ثبت نشده';
+                const bale = p.bale || 'ثبت نشده';
+                const rank = p.rank || '-';
+                const role = p.role || 'عضو عادی';
+                const code = p.code || '-';
+                const activity = p.activity || 'نامشخص';
+
+                // Role Badge Color
+                let roleClass = 'bg-red-500/10 text-red-300 border-red-500/20';
+                if (role.includes('لیدر') || role.includes('سپهبد') || role.includes('ارتشبد') || role.includes('کولیدر')) {
+                    roleClass = 'bg-amber-500/15 text-amber-300 border-amber-500/30';
+                }
+
+                const card = document.createElement('div');
+                card.className = 'glass-card rounded-2xl p-6 shadow-xl transition duration-300 flex flex-col justify-between';
+                
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="text-xl font-bold text-white">${realName}</h3>
+                                <p class="text-xs text-red-400 mt-0.5">آیدی بازی: ${gameName}</p>
+                   
